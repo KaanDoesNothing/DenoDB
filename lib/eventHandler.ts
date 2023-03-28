@@ -1,0 +1,26 @@
+import EventEmitter from "https://deno.land/x/events/mod.ts";
+import { tableWorkers } from "./tables.ts";
+
+class eventHandler extends EventEmitter {
+    setup() {
+        tableWorkers.forEach((worker: Worker) => {
+            worker.onmessage = (event) => {
+                const e = event.data;
+                this.emit(e.type, e.data);
+                console.log("Event received", e.type);
+            }
+        })
+    }
+}
+
+export const waitForEvent = (name: string): any => {
+    return new Promise((resolve) => {
+        events.once(name, (data: any) => resolve(data)); 
+    });
+}
+
+export const createEventName = (type: string) => {
+    return `${type}-${Date.now()}`;
+}
+
+export const events = new eventHandler();
