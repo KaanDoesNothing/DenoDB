@@ -14,7 +14,7 @@ events.setup();
 await delay(1000)
 
 const res = await find({table: "users", query: {username: "kaan075"}});
-// console.log(res);
+console.log(res);
 // console.log(JSON.stringify(res));
 // await insert({table: "users", query: {username: "kaan075"}});
 

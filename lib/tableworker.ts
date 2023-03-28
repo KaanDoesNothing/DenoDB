@@ -19,21 +19,11 @@ class tableHandler {
 
     async init() {
         await this.loadFiles();
-
-        // for (let i = 0; i < 10000; i++) {
-        //     await this.insert({data: {username: Date.now().toString()}})
-        // }
-
-        // console.time("test1");
-        // await this.find({query: {kanker: "test"}})
-        // console.timeEnd("test1");
     }
 
     async handleEvent(event: any) {
        const e = event.data;
        if(e.type === "eval") {
-            // console.log(data);
-            // console.log("Running eval")
             const result = await eval(`(async () => ${e.data})()`);
 
             console.log(e.event_id);
@@ -99,15 +89,7 @@ class tableHandler {
     async find(query: any) {
         let results = [];
 
-        let properties = [];
-
-        for (let i in query) {
-            properties.push(i)
-        }
-
-        // console.log("properties", properties);
-
-        // console.log("query", query)
+        const properties = Object.keys(query);
 
         for (let [key, value] of this.cache) {
             let matches = 0;
@@ -116,15 +98,11 @@ class tableHandler {
                 if(query[property] === value[property]) matches++;
             });
 
-            
-            // console.log("matches", matches, properties.length)
 
             if(matches === properties.length) {
                 results.push({key, value});
             }
         }
-
-        // console.log("results", this.table, results)
 
         return results;
     }
