@@ -38,7 +38,10 @@ export const loadTables = async () => {
         table_worker.onmessage = (event) => {
                 const e = event.data;
                 events.emit(e.type, e.data);
-                console.log("Event received", e.type);
+
+                const splitMessage = e.type.split("-")[1];
+                
+                console.log("Event received", e.type, parseInt(splitMessage) ? `${Date.now() - parseInt(splitMessage)}ms`: "");
             }
 
         await waitForEvent(`table-${table_name}-ready`);
