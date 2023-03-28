@@ -9,8 +9,6 @@ console.time("Loading Tables");
 await loadTables();
 console.timeEnd("Loading Tables");
 
-events.setup();
-
 await delay(1000)
 
 const res = await find({table: "users", query: {username: "kaan075"}});

@@ -1,6 +1,6 @@
 import {ensureDir} from "https://deno.land/std@0.181.0/fs/mod.ts";
 import {readdir} from "node:fs";
-import { createEventName, waitForEvent } from "./eventHandler.ts";
+import { createEventName, events, waitForEvent } from "./eventHandler.ts";
 
 export const schemas = new Map();
 
@@ -35,7 +35,13 @@ export const loadTables = async () => {
         
         tableWorkers.set(table_name, table_worker);
 
-        // await waitForEvent(`table-${table_name}-ready`);
+        table_worker.onmessage = (event) => {
+                const e = event.data;
+                events.emit(e.type, e.data);
+                console.log("Event received", e.type);
+            }
+
+        await waitForEvent(`table-${table_name}-ready`);
     }
 }
 

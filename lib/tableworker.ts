@@ -54,7 +54,7 @@ class tableHandler {
 
         console.timeEnd(`Loading cache for ${this.table}`);
 
-        postMessage({type: `ready`, data: {}});
+        postMessage({type: `table-${this.table}-ready`, data: {}});
     }
 
     async updateCache({id}: {id: number}) {
