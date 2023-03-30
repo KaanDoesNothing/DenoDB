@@ -1,4 +1,5 @@
 import {readdir} from "node:fs";
+import { sortDirection } from "../types.ts";
 
 let tableInstance: tableHandler;
 
@@ -21,7 +22,7 @@ class tableHandler {
         await this.loadFiles();
     }
 
-    async handleEvent(event: any) {
+    async handleEvent(event: {type: string, data: any}) {
        const e = event.data;
        if(e.type === "eval") {
             const result = await eval(`(async () => ${e.data})()`);
@@ -48,6 +49,8 @@ class tableHandler {
             const id = file_name.split(".json")[0];
     
             const parsed = JSON.parse(file);
+
+            if(parsed.deleted) continue;
     
             this.cache.set(parseInt(id), parsed);
         }
@@ -82,29 +85,46 @@ class tableHandler {
     }
 
     async delete({id}: {id: number}) {
-        await Deno.remove(`./data/${this.table}/${id}.json`);
+        await Deno.writeTextFile(`./data/${this.table}/${id}.json`, JSON.stringify({deleted: true}));
+        // await Deno.remove(`./data/${this.table}/${id}.json`);
         this.cache.delete(id);
     }
 
-    async find(query: any) {
-        let results = [];
+    async filterWorker(query: any, data: any) {
+        return new Promise((resolve, reject) => {
+            const table_worker = new Worker(new URL("./filter_worker.ts", import.meta.url).href, { type: "module" });
 
-        const properties = Object.keys(query);
-
-        for (let [key, value] of this.cache) {
-            let matches = 0;
-
-            properties.forEach(property => {
-                if(query[property] === value[property]) matches++;
-            });
-
-
-            if(matches === properties.length) {
-                results.push({key, value});
+            table_worker.postMessage({query, data});
+            table_worker.onmessage = (e) => {
+                table_worker.terminate();
+                resolve(e.data.result);
             }
+        });
+    }
+
+    async find(query: any) {
+        const properties = Object.keys(query);
+        const chunkSize = 4000;
+        const chunks = [];
+
+        for (let i = 0; i < this.cache.size; i += chunkSize) {
+            const chunk = [...this.cache].slice(i, i + chunkSize);
+            chunks.push(chunk);
         }
 
+        const results = await Promise.all(chunks.map(chunk => this.filterWorker(query, chunk)));
+
         return results;
+    }
+
+    sort(data: any, value: string, direction: sortDirection) {
+        return data.sort((a: any, b: any) => {
+            if(direction === "asc") {
+                return b[value] - a[value];
+            }else {
+                return a[value] - b[value];
+            }
+        });
     }
 }
 

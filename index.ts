@@ -9,14 +9,16 @@ console.time("Loading Tables");
 await loadTables();
 console.timeEnd("Loading Tables");
 
-await delay(1000)
+// await delay(1000)
 
-const res = await find({table: "users", query: {username: "kaan075"}});
-console.log(res);
+// const res = await find({table: "events", query: {author: "kaan075"}});
+// console.log(res.length);
+
 // console.log(JSON.stringify(res));
 // await insert({table: "users", query: {username: "kaan075"}});
 
 
-// for (let i = 0; i < 1000; i++) {
-//     await insert({table: "users", query: {username: Date.now()}});
-// } 
+for (let i = 0; i < 100000; i++) {
+    const res = await find({table: "events", query: {}});
+    console.log(res.length);
+} 
