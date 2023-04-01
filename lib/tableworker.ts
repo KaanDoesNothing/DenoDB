@@ -116,11 +116,14 @@ class tableHandler {
 
         const fetchedResult = await Promise.all(chunks.map(chunk => this.filterWorker(query, chunk)));
         for (let i in fetchedResult) {
-            const row = fetchedResult[i];
+            const row: any = fetchedResult[i];
 
-            // console.log(row)
 
-            row.forEach(doc => results.push(doc));
+            for (let i in row as []) {
+                const doc = row[i];
+
+                results.push(doc);
+            }
         }
 
         return results;
