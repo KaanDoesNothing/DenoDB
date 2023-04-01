@@ -97,22 +97,31 @@ class tableHandler {
             table_worker.postMessage({query, data});
             table_worker.onmessage = (e) => {
                 table_worker.terminate();
-                resolve(e.data.result);
+                resolve(e.data.results);
             }
         });
     }
 
     async find(query: any) {
         const properties = Object.keys(query);
-        const chunkSize = 4000;
+        const chunkSize = 2000;
         const chunks = [];
+
+        let results = [];
 
         for (let i = 0; i < this.cache.size; i += chunkSize) {
             const chunk = [...this.cache].slice(i, i + chunkSize);
             chunks.push(chunk);
         }
 
-        const results = await Promise.all(chunks.map(chunk => this.filterWorker(query, chunk)));
+        const fetchedResult = await Promise.all(chunks.map(chunk => this.filterWorker(query, chunk)));
+        for (let i in fetchedResult) {
+            const row = fetchedResult[i];
+
+            // console.log(row)
+
+            row.forEach(doc => results.push(doc));
+        }
 
         return results;
     }

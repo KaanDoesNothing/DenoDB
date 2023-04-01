@@ -19,6 +19,6 @@ console.timeEnd("Loading Tables");
 
 
 for (let i = 0; i < 100000; i++) {
-    const res = await find({table: "events", query: {}});
-    console.log(res.length);
+    const res = await find({table: "users", query: {username: "kaan075"}});
+    console.log(res[0]);
 } 
